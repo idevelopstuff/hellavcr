@@ -785,14 +785,8 @@ function download_nzb($nzb_info) {
 			}
 			
 			$url = $config['nzbmatrix']['root_url'] . 'api-nzb-download.php?' . 'id=' . $nzb_info['id'] . '&username=' . $config['nzbmatrix_username'] . '&apikey=' . $config['nzbmatrix_key'];
-			print "Getting file from: '" . $url . "'";
 			$nzb = file_get_contents($url);
-			//echo "NZB1: " . $nzb . "\n";
-			//$nzb = gzuncompress($nzb);
-			//echo "NZB2: " . $nzb . "\n";
-			//print_r($http_response_header);
 			$nzb = gzdecode($nzb);
-			//echo $nzb;			
 
 			//error
 			if(stripos($nzb, 'error:') === 0) {

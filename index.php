@@ -46,7 +46,8 @@ switch($_REQUEST['op']) {
 			$show->addChild('next', '');
 			$show->addChild('url', '');
 			$show->addChild('status', '');
-			
+			$show->addChild('offpeak', isset($_POST['offpeak'])?"1":"0");
+
 			//write updated xml file
 			print saveXML($xml) ? 1 : 0;
 		}
@@ -78,7 +79,8 @@ switch($_REQUEST['op']) {
 				$show->source = trim($_POST['source']);
 				$show->format = trim($_POST['format']);
 				$show->poster = trim($_POST['poster']);
-				
+				$show->offpeak = isset($_POST['offpeak'])?"1":"0";
+
 				$saved = saveXML($xml);
 				header('Location: ' . $_SERVER['REQUEST_URI'] . '#' . urlencode(trim($_POST['name'])));
 			}
@@ -288,6 +290,12 @@ function sortShows($show1, $show2) {
 						<option value="<?php print $id; ?>"><?php print $source; ?></option>
 						<?php } ?>
 					</select>
+				</td>
+			</tr>
+			<tr>
+				<th</th>
+				<td>
+					<input type="checkbox" id="offpeak" />Offpeak<br />
 				</td>
 			</tr>
 			<tr>
@@ -607,6 +615,9 @@ if(file_exists($config['xml_tv'])) {
 				<p>
 					<span class="title">Language:</span> <span class="info <?php print $language_class; ?>"><?php print empty($show->language) ? 'any' : $GLOBALS['languages'][strval($show->language)]; ?></span>
 				</p>
+				<p>
+					<span class="title">Offpeak:</span> <span class="info <?php print $language_class; ?>"><?php print ($show->offpeak == 0)?"False":"True"; ?></span>
+				</p>
 			</div>
 			<div id="edit_<?php print $showID; ?>" class="formWrapper editFormWrapper">
 				<form id="editform_<?php print $showID; ?>" method="post" action="">
@@ -654,6 +665,12 @@ if(file_exists($config['xml_tv'])) {
 								</select>
 							</td>
 						</tr>
+			  			<tr>
+							<th></th>
+							<td>
+				  				<input type="checkbox" name="offpeak" <?php print $show->offpeak == "1"?"CHECKED":""; ?> />Offpeak<br />
+							</td>
+			  			</tr>
 						<tr>
 							<th></th>
 							<td>

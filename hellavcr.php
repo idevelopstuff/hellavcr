@@ -48,7 +48,17 @@ function process_tv() {
 			
 			//full show name
 			$name = htmlspecialchars_decode($show->name) . $nameExtra;
-			print date($config['logging']['date_format']) . $name . "\n";
+			print date($config['logging']['date_format']);
+
+      //Offpeak manager
+      $config['this_show_offpeak'] = $show->offpeak;
+      if (!isOffpeak()){ 
+          if ($show->offpeak == "1"){
+            print "Offpeak. " . $name . "\n";          
+            continue; 
+          }
+      }
+      print $name . "\n";
 			
 			//get info from tvrage
 			$show_info = get_show_info($show->name);
@@ -590,6 +600,7 @@ function search_nzb($params) {
 				'term' => $q,
 				'format' => $params['format']
 			));
+			echo "Looking for: '" . $query . "'\n";
 			
 			//send to nzbmatrix
 			if($result = @file_get_contents($query, 'r')) {
@@ -774,8 +785,15 @@ function download_nzb($nzb_info) {
 			}
 			
 			$url = $config['nzbmatrix']['root_url'] . 'api-nzb-download.php?' . 'id=' . $nzb_info['id'] . '&username=' . $config['nzbmatrix_username'] . '&apikey=' . $config['nzbmatrix_key'];
-			$nzb = @file_get_contents($url);
-			
+			print "Getting file from: '" . $url . "'";
+			$nzb = file_get_contents($url);
+			//echo "NZB1: " . $nzb . "\n";
+			//$nzb = gzuncompress($nzb);
+			//echo "NZB2: " . $nzb . "\n";
+			//print_r($http_response_header);
+			$nzb = gzdecode($nzb);
+			//echo $nzb;			
+
 			//error
 			if(stripos($nzb, 'error:') === 0) {
 				//api rate limited exceeded, so wait the required time and try again
@@ -792,6 +810,7 @@ function download_nzb($nzb_info) {
 			}
 			//all good
 			else {
+				//echo "NZB: " . $nzb . "\n";
 				$fp_nzb = fopen($config['nzb_queue'] . str_replace('/', ' ', $nzb_info['title']) . '.nzb', 'w');
 				$nzb_written = fwrite($fp_nzb, $nzb);
 				print ($nzb_written ? 'written' : 'FAIL (writing the nzb, check directory permissions)');
@@ -1011,6 +1030,33 @@ function send_prowl($event, $description) {
 	), true);
 	return $prowl->getError();
 }
+
+
+function isOffpeak(){
+	global $config;
+	$so = $config['this_show_offpeak'];
+	$offpeak = false;
+	$now_for_offpeak = date('Hi');
+	$start = $config['offpeak_start'];
+	$end = $config['offpeak_end'];
+	$start = str_replace(":", "", $start);
+	$end = str_replace(":", "", $end);
+
+	if ($now_for_offpeak > $start && $now_for_offpeak < $end && $so == "1"){
+		$offpeak = true;
+	}
+	return $offpeak;
+}
+
+function gzdecode($data){
+  $g=tempnam('/tmp','ff');
+  @file_put_contents($g,$data);
+  ob_start();
+  readgzfile($g);
+  $d=ob_get_clean();
+  return $d;
+}
+
 
 ##### main call
 

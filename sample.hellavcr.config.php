@@ -90,7 +90,12 @@ $config = array(
 	//prowl
 	'prowl' => false,
 	'prowl_apikey' => '',
-	'prowl_priority' => 0
+	'prowl_priority' => 0,
+
+        //Offpeak 24h time
+        'offpeak_start' => '04:00',
+        'offpeak_end' => '09:00'
+
 
 );
 
